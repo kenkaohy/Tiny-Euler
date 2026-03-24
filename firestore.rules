@@ -1,0 +1,91 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: students
+    // Document ID: User's Auth UID
+    // Fields:
+    //   - displayName: string (required, 1-100 chars)
+    //   - gradeLevel: number (required, 3-5)
+    //   - overallCAASPPLevel: string (required, enum)
+    //   - topicLevels: map (required, values are CAASPP level strings)
+    //
+    // Sub-collection: practice_sessions
+    // Document ID: Auto-generated
+    // Fields:
+    //   - timestamp: timestamp (required)
+    //   - topic: string (required, 1-100 chars)
+    //   - sessionScore: number (required, 0-3)
+    //   - levelAdjustment: string (required, enum)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "ken.kao.hy@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidCAASPPLevel(level) {
+      return level in ["Challenger", "Duelist", "Elite", "Gladiator"];
+    }
+
+    function isValidAdjustment(adj) {
+      return adj in ["Promoted", "Demoted", "Maintained"];
+    }
+
+    function isValidStudent(data) {
+      return data.keys().hasAll(['displayName', 'gradeLevel', 'overallCAASPPLevel', 'topicLevels']) &&
+             data.displayName is string && data.displayName.size() > 0 && data.displayName.size() <= 100 &&
+             data.gradeLevel is number && data.gradeLevel >= 3 && data.gradeLevel <= 5 &&
+             isValidCAASPPLevel(data.overallCAASPPLevel) &&
+             data.topicLevels is map;
+    }
+
+    function isValidSession(data) {
+      return data.keys().hasAll(['timestamp', 'topic', 'sessionScore', 'levelAdjustment']) &&
+             data.timestamp is timestamp &&
+             data.topic is string && data.topic.size() > 0 && data.topic.size() <= 100 &&
+             data.sessionScore is number && data.sessionScore >= 0 && data.sessionScore <= 3 &&
+             isValidAdjustment(data.levelAdjustment);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /students/{studentId} {
+      allow read: if isOwner(studentId) || isAdmin();
+      allow create: if isOwner(studentId) && isValidStudent(request.resource.data);
+      allow update: if (isOwner(studentId) && isValidStudent(request.resource.data)) || isAdmin();
+      allow delete: if isAdmin();
+
+      match /practice_sessions/{sessionId} {
+        allow read: if isOwner(studentId) || isAdmin();
+        allow create: if isOwner(studentId) && isValidSession(request.resource.data);
+        allow update: if isAdmin();
+        allow delete: if isAdmin();
+      }
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.role == 'student';
+      allow update: if isAdmin();
+    }
+  }
+}

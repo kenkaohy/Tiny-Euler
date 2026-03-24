@@ -1,0 +1,49 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student Profile",
+      "description": "Stores student progress and adaptive learning levels.",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string", "description": "Student's name" },
+        "gradeLevel": { "type": "integer", "description": "Grade level (3-5)" },
+        "overallCAASPPLevel": { 
+          "type": "string", 
+          "enum": ["Challenger", "Duelist", "Elite", "Gladiator"],
+          "description": "Overall CAASPP performance level"
+        },
+        "topicLevels": { 
+          "type": "object", 
+          "description": "Map of topic names to CAASPP levels" 
+        }
+      },
+      "required": ["displayName", "gradeLevel", "overallCAASPPLevel", "topicLevels"]
+    },
+    "PracticeSession": {
+      "title": "Practice Session",
+      "description": "Record of a single math practice session.",
+      "type": "object",
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the session occurred" },
+        "topic": { "type": "string", "description": "The math topic practiced" },
+        "sessionScore": { "type": "integer", "description": "Score out of 3" },
+        "levelAdjustment": { 
+          "type": "string", 
+          "enum": ["Promoted", "Demoted", "Maintained"],
+          "description": "Result of the adaptive logic"
+        }
+      },
+      "required": ["timestamp", "topic", "sessionScore", "levelAdjustment"]
+    }
+  },
+  "firestore": {
+    "/students/{studentId}": {
+      "schema": "Student",
+      "description": "Root collection for student profiles"
+    },
+    "/students/{studentId}/practice_sessions/{sessionId}": {
+      "schema": "PracticeSession",
+      "description": "Sub-collection for student practice history"
+    }
+  }
+}
