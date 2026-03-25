@@ -7,7 +7,7 @@ import { generateMathTask, gradeExplanation } from "./services/geminiService";
 import Dashboard from "./components/Dashboard";
 import PerformanceTask from "./components/PerformanceTask";
 import Login from "./components/Login";
-import { Loader2, LogOut, Calculator } from "lucide-react";
+import { LogOut, Calculator } from "lucide-react";
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -108,8 +108,18 @@ export default function App() {
 
   if (!isAuthReady) {
     return (
-      <div className="min-h-screen bg-[#F4EBD0] flex items-center justify-center">
-        <Loader2 className="w-16 h-16 text-black animate-spin" strokeWidth={3} />
+      <div className="fixed inset-0 w-full h-full bg-black z-50">
+        <video 
+          src="/Cow_Cooking_Video_Generation.mp4" 
+          autoPlay 
+          loop 
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+          <p className="text-white font-bangers text-6xl tracking-wider drop-shadow-[4px_4px_0px_#000]">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -140,9 +150,18 @@ export default function App() {
       </header>
 
       {isGenerating ? (
-        <div className="flex flex-col items-center justify-center h-[calc(100vh-5rem)]">
-          <Loader2 className="w-20 h-20 text-black animate-spin mb-6" strokeWidth={3} />
-          <p className="text-black font-bangers text-4xl tracking-wider drop-shadow-[2px_2px_0px_#fff]">Cooking up a mission...</p>
+        <div className="fixed inset-0 w-full h-full bg-black z-50">
+          <video 
+            src="/Cow_Cooking_Video_Generation.mp4" 
+            autoPlay 
+            loop 
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <p className="text-white font-bangers text-6xl tracking-wider drop-shadow-[4px_4px_0px_#000]">Cooking up a mission...</p>
+          </div>
         </div>
       ) : currentTask ? (
         <PerformanceTask

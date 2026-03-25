@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
-import { Loader2, Calculator } from "lucide-react";
+import { Calculator } from "lucide-react";
 
 interface LoginProps {
   onLogin: (uid: string, displayName: string, gradeLevel: number) => void;
@@ -27,6 +27,21 @@ export default function Login({ onLogin }: LoginProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-[#F4EBD0] relative overflow-hidden">
+      {isLoading && (
+        <div className="fixed inset-0 w-full h-full bg-black z-50">
+          <video 
+            src="/Cow_Cooking_Video_Generation.mp4" 
+            autoPlay 
+            loop 
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <p className="text-white font-bangers text-6xl tracking-wider drop-shadow-[4px_4px_0px_#000]">Signing in...</p>
+          </div>
+        </div>
+      )}
       <div className="retro-box p-8 max-w-md w-full bg-[#FFF9E6] relative z-10">
         <div className="flex flex-col items-center text-center mb-8">
           <div className="w-32 h-32 bg-[#E52521] border-4 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center text-white mb-6 transform -rotate-3 overflow-hidden">
@@ -62,7 +77,7 @@ export default function Login({ onLogin }: LoginProps) {
             className="w-full py-4 bg-[#FFD166] text-black font-bangers text-2xl tracking-wider retro-btn flex items-center justify-center"
           >
             {isLoading ? (
-              <Loader2 className="w-8 h-8 animate-spin" strokeWidth={3} />
+              "Signing in..."
             ) : (
               "Sign in with Google!"
             )}
